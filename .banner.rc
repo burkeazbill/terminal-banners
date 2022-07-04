@@ -1,0 +1,195 @@
+# Inspired by: https://github.com/benc-uk/dotfiles <- does not detect MacOS -- just for Linux
+# Updated for MacOS By: 
+#   Burke Azbill @TechnicalValues github.com/burkeazbill
+
+# How to install:
+#   1. Copy this file (.banner.rc) to your home directory. Should be $HOME/.banner.rc
+#   2. Uncomment your desired fade color (line 19-23) If none are uncommented, GREEN will be used
+#   2. Add the following line to the end of your ~/.bashrc and/or ~/.zshrc: 
+#      echo "if [ -f $HOME/.banner.rc ]; then source $HOME/.banner.rc; fi" >> $HOME/.bashrc
+#      echo "if [ -f $HOME/.banner.rc ]; then source $HOME/.banner.rc; fi" >> $HOME/.zshrc
+#    If you ONLY want to display while in an SSH Session:
+#      echo 'if [ -f $HOME/.banner.rc ]; then   if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then source $HOME/.banner.rc; fi; fi' >> $HOME/.bashrc
+#      echo 'if [ -f $HOME/.banner.rc ]; then   if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then source $HOME/.banner.rc; fi; fi' >> $HOME/.zshrc
+#   3. Exit your terminal and re-launch. You should now have the colorized banner prompt show
+###############################################################################################
+# Configure your Fade Choice: RED BLUE ORANGE GREEN PURPLE
+# Uncomment only one - if multiple uncommented, only last one is applied:
+# fade_color=RED
+fade_color=BLUE
+# fade_color=ORANGE
+# fade_color=GREEN
+# fade_color=PURPLE
+#### If none of the above are uncommented, then a GREEN fade will be used
+public_ip_url="ifconfig.co"
+version="Unknown!"
+where="Some Linux system 🤷"
+# And what shell is in use (default assume Zsh )
+shelltype="👍 Standard \e[38;5;226m`basename $SHELL` \e[38;5;202mShell"
+if [[ "`basename $SHELL`" == "zsh" ]]; then
+  if [ -f $HOME/.p10k.zsh ]; then
+    # if p10k is available then Oh-My-ZSH is likely running
+    shelltype="Oh My Zsh \e[37m& \e[38;5;226mPowerlevel10K"
+  fi
+fi
+# Detect the platform
+OS="`uname -s`"
+if [[ "$OS" == "Linux" ]]; then
+  # Get eth0 IP address or fallback to local
+  if command -v ip &> /dev/null; then
+    # Get the active nic:
+    active_nic=$(ip addr show | awk '/inet.*brd/{print $NF; exit}')
+    # Now get the IP Address for that nic:
+    ip=$(ip addr show $active_nic | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+  else
+    ip=$(hostname -i)
+  fi
+  #### Get The Linux OS Name:
+  where_name=$(cat /etc/os-release | grep ^NAME | cut -d'=' -f2 | sed -e 's/^"//' -e 's/"$//')
+  where_id=$(cat /etc/os-release | grep ^ID= | cut -d'=' -f2 | sed -e 's/^"//' -e 's/"$//')
+  ## Add ico for Detected Linux OS
+  ## Where clause based on ID of os-release as per: https://gitlab.com/zygoon/os-release-zoo
+  # Can find Unicode Icons here:
+  # - http://www.amp-what.com/
+  # - https://unicode-table.com/en/
+  # - https://unicode.org/emoji/charts/full-emoji-list.html 
+  case "$where_id" in
+    ubuntu)
+      where="$where_name "
+      ;;
+    debian)
+      where="$where_name "
+      ;;
+    fedora)
+      where="$where_name "
+      ;;
+    rhel)
+      where="$where_name "
+      ;;
+    centos)
+      where="$where_name "
+      ;;
+    linuxmint)
+      where="$where_name "
+      ;;
+    manjaro)
+      where="$where_name "
+      ;;
+    alpine)
+      where="$where_name "
+      ;;
+    arch)
+      where="$where_name "
+      ;;
+    photon)
+      where="$where_name "
+      ;;
+      # Add more entries below based on the output of the where line above
+      # for icons, visit www.nerdfonts.com/cheat-sheet and copy the ico version of the os icon
+    *)
+      where="$where "
+      ;;
+  esac
+  if [ -f /var/log/vmware/Environment.txt ]; then
+    pool_name=$(cat /var/log/vmware/Environment.txt | grep Launch_ID: | cut -d ' ' -f2 )
+    where="$where (Horizon Desktop Pool: $pool_name)"
+  fi
+elif [[ "$OS" == "Darwin" ]]; then
+  ##### Get IP Address
+  ip=$(ifconfig en0 | grep "inet " | cut -d ':' -f 2 | cut -d ' ' -f 2)
+  ##### Set Where/OS
+    where="MacOS ";
+  ##### Set Version
+  version=${1-$(sw_vers -productVersion)}
+fi
+
+##### Get the Public IP:
+# Get public IP address if file doesn't exist and it is younger than 4 hours
+if [[ -f $HOME/publicip ]]; then
+  if [[ $(find $HOME/publicip -mmin +240) == "$HOME/publicip" ]]; then
+    # echo "IP file is older than 4 hours, retrieving current IP"
+    curl -m 1 -s ${public_ip_url} > $HOME/publicip
+  fi
+else
+  # echo "IP file doesn't exist yet, retrieving current IP"
+  curl -m 1 -s ${public_ip_url} > $HOME/publicip
+fi
+publicip=$(cat $HOME/publicip)
+
+if [[ ! -z $WSL_DISTRO_NAME ]]; then where="Windows Subsystem for Linux v1 💙"; fi
+if [[ ! -z $WSL_INTEROP ]]; then where="Windows Subsystem for Linux v2 💚"; fi
+if [[ -f /.dockerenv ]]; then where="Inside a Docker container 🐳"; fi
+if [[ ! -z $REMOTE_CONTAINERS_IPC ]]; then where="Inside a Devcontainer. Let's code! 💻"; fi
+if [[ ! -z $ACC_TERM_ID ]]; then where="Azure Cloud Shell ($ACC_LOCATION)\e[37m☁"; fi
+if [[ $CODESPACES == "true" ]]; then where="GitHub Codespaces\e[37m🐙"; fi
+if command -v lsb_release &> /dev/null; then
+  if [[ "$(lsb_release -i)" =~ "Raspbian" ]]; then where="Raspberry Pi 🍇"; fi
+fi
+
+# lsb_release might not be installed :/
+if test -f /etc/os-release; then
+  . /etc/os-release
+  version=$VERSION
+elif command -v lsb_release > /dev/null; then
+  version=$(lsb_release -ds)
+fi
+
+# View Coloring options here: https://misc.flogisoft.com/bash/tip_colors_and_formatting - or search ascii color chart
+case "$fade_color" in
+  BLUE)
+    # Show the banner - Blue Fade
+    echo -e "\e[38;5;195m╭───── 🔵 \e[38;5;202m$shelltype 🟦"
+    echo -e "\e[38;5;152m├──❱ \e[38;5;135mEnviron: \e[38;5;45m$where"
+    echo -e "\e[38;5;117m├──❱ \e[38;5;135mKernel:  \e[38;5;45m$(uname -r) 🌎"
+    echo -e "\e[38;5;81m├──❱ \e[38;5;135mVersion: \e[38;5;45m$version ⭐"
+    echo -e "\e[38;5;39m├──❱ \e[38;5;135mIP:      \e[38;5;45m$ip / $publicip 📡"
+    echo -e "\e[38;5;26m╰──❱ \e[38;5;135mHost:    \e[38;5;45m$(hostname) 🏠"
+    ;;
+  RED)
+    # Show the banner - Red Fade
+    echo -e "\e[38;5;219m╭───── 🔴 \e[38;5;202m$shelltype 🟥"
+    echo -e "\e[38;5;202m├──❱ \e[38;5;135mEnviron: \e[38;5;45m$where"
+    echo -e "\e[38;5;162m├──❱ \e[38;5;135mKernel:  \e[38;5;45m$(uname -r) 🌎"
+    echo -e "\e[38;5;124m├──❱ \e[38;5;135mVersion: \e[38;5;45m$version ⭐"
+    echo -e "\e[38;5;89m├──❱ \e[38;5;135mIP:      \e[38;5;45m$ip / $publicip 📡"
+    echo -e "\e[38;5;52m╰──❱ \e[38;5;135mHost:    \e[38;5;45m$(hostname) 🏠"
+    ;;
+  ORANGE)
+    # Show the banner - Orange Fade
+    echo -e "\e[38;5;229m╭───── 🟠 \e[38;5;202m$shelltype 🟧"
+    echo -e "\e[38;5;226m├──❱ \e[38;5;135mEnviron: \e[38;5;45m$where"
+    echo -e "\e[38;5;216m├──❱ \e[38;5;135mKernel:  \e[38;5;45m$(uname -r) 🌎"
+    echo -e "\e[38;5;202m├──❱ \e[38;5;135mVersion: \e[38;5;45m$version ⭐"
+    echo -e "\e[38;5;168m├──❱ \e[38;5;135mIP:      \e[38;5;45m$ip / $publicip 📡"
+    echo -e "\e[38;5;130m╰──❱ \e[38;5;135mHost:    \e[38;5;45m$(hostname) 🏠"
+    ;;
+  GREEN)
+    # Show the banner - Green Fade
+    echo -e "\e[38;5;192m╭───── 🟢 \e[38;5;202m$shelltype 🟩"
+    echo -e "\e[38;5;155m├──❱ \e[38;5;135mEnviron: \e[38;5;45m$where"
+    echo -e "\e[38;5;118m├──❱ \e[38;5;135mKernel:  \e[38;5;45m$(uname -r) 🌎"
+    echo -e "\e[38;5;40m├──❱ \e[38;5;135mVersion: \e[38;5;45m$version ⭐"
+    echo -e "\e[38;5;34m├──❱ \e[38;5;135mIP:      \e[38;5;45m$ip / $publicip 📡"
+    echo -e "\e[38;5;28m╰──❱ \e[38;5;135mHost:    \e[38;5;45m$(hostname) 🏠"
+    ;;
+  PURPLE)
+    # Show the banner - Purple Fade
+    echo -e "\e[38;5;225m╭───── 🟣 \e[38;5;202m$shelltype 🟪"
+    echo -e "\e[38;5;147m├──❱ \e[38;5;135mEnviron: \e[38;5;45m$where"
+    echo -e "\e[38;5;111m├──❱ \e[38;5;135mKernel:  \e[38;5;45m$(uname -r) 🌎"
+    echo -e "\e[38;5;104m├──❱ \e[38;5;135mVersion: \e[38;5;45m$version ⭐"
+    echo -e "\e[38;5;62m├──❱ \e[38;5;135mIP:      \e[38;5;45m$ip / $publicip 📡"
+    echo -e "\e[38;5;57m╰──❱ \e[38;5;135mHost:    \e[38;5;45m$(hostname) 🏠"
+    ;;
+  *)
+    # If all colors commented out, use Green Fade
+    echo -e "\e[38;5;192m╭───── 🟢 \e[38;5;202m$shelltype 🟩"
+    echo -e "\e[38;5;155m├──❱ \e[38;5;135mEnviron: \e[38;5;45m$where"
+    echo -e "\e[38;5;118m├──❱ \e[38;5;135mKernel:  \e[38;5;45m$(uname -r) 🌎"
+    echo -e "\e[38;5;40m├──❱ \e[38;5;135mVersion: \e[38;5;45m$version ⭐"
+    echo -e "\e[38;5;34m├──❱ \e[38;5;135mIP:      \e[38;5;45m$ip / $publicip 📡"
+    echo -e "\e[38;5;28m╰──❱ \e[38;5;135mHost:    \e[38;5;45m$(hostname) 🏠"
+    ;;
+esac
+echo -ne "\033]110;\007\033]111;\007"
+echo -e ""
