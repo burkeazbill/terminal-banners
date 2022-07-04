@@ -7,7 +7,7 @@ The primary terminal banner in this repo ".banner.rc" was inspired by, and initi
 - Support for MacOS
 - Support for VMware Horizon Desktop Pool (Only displayed if run on VMware Horizon Desktop)
 
-## Example Screenshots:
+## Example Screenshots: (NOTE: Right side of IP will show Public IP - just showing local for screenshots)
 
 ![Red theme running on Ubuntu](images/banner-red-ubuntu.png)
 
