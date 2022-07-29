@@ -70,7 +70,16 @@ case "$fade_color" in
     row8color=$(tput setaf 219)
     ;;
   *)
-    # Default to GREEN 
+    # Default to BLUE until this file is completed... still need
+    # to figure out color codes to make Orange, Purple, and Green fades using this other color method
+    row1color=$(tput setaf 27)
+    row2color=$(tput setaf 33)
+    row3color=$(tput setaf 39)
+    row4color=$(tput setaf 81)
+    row5color=$(tput setaf 45)
+    row6color=$(tput setaf 51)
+    row7color=$(tput setaf 87)
+    row8color=$(tput setaf 159)
   ;;
 esac
 
