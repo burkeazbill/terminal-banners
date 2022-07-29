@@ -69,17 +69,36 @@ case "$fade_color" in
     row7color=$(tput setaf 201)
     row8color=$(tput setaf 219)
     ;;
+  ORANGE)
+    row1color=$(tput setaf 130)
+    row2color=$(tput setaf 168)
+    row3color=$(tput setaf 202)
+    row4color=$(tput setaf 216)
+    row5color=$(tput setaf 226)
+    row6color=$(tput setaf 229)
+    row7color=$(tput setaf 229)
+    row8color=$(tput setaf 229)
+    ;;
+  PURPLE)
+    row1color=$(tput setaf 57)
+    row2color=$(tput setaf 62)
+    row3color=$(tput setaf 104)
+    row4color=$(tput setaf 111)
+    row5color=$(tput setaf 147)
+    row6color=$(tput setaf 225)
+    row7color=$(tput setaf 225)
+    row8color=$(tput setaf 225)
+    ;;
   *)
-    # Default to BLUE until this file is completed... still need
-    # to figure out color codes to make Orange, Purple, and Green fades using this other color method
-    row1color=$(tput setaf 27)
-    row2color=$(tput setaf 33)
-    row3color=$(tput setaf 39)
-    row4color=$(tput setaf 81)
-    row5color=$(tput setaf 45)
-    row6color=$(tput setaf 51)
-    row7color=$(tput setaf 87)
-    row8color=$(tput setaf 159)
+    # Default to GREEN 
+    row1color=$(tput setaf 28)
+    row2color=$(tput setaf 34)
+    row3color=$(tput setaf 40)
+    row4color=$(tput setaf 118)
+    row5color=$(tput setaf 115)
+    row6color=$(tput setaf 192)
+    row7color=$(tput setaf 192)
+    row8color=$(tput setaf 192)
   ;;
 esac
 
@@ -98,23 +117,23 @@ fmt8="${row8color}%-25s${row8color}%-12s\n"
 case "$fade_color" in
   BLUE)
     # Show the banner - Blue Fade
-    printf "${row1color}╭─────  ${row5color}Tool Versions  ${row1color}───────────────❱\n"
+    printf "${row1color}╭───── 🔵 ${row5color}Tool Versions 🟦💙 ${row1color}───────────────❱\n"
     ;;
   RED)
     # Show the banner - Red Fade
-    printf "${row1color}╭─────  ${row7color}Tool Versions  ${row1color}───────────────❱\n"
+    printf "${row1color}╭───── 🔴 ${row7color}Tool Versions 🟥💔 ${row1color}───────────────❱\n"
     ;;
   ORANGE)
     # Show the banner - Orange Fade
-    printf "${row1color}╭─────  ${row8color}Tool Versions 李 ${row1color}───────────────❱\n"
+    printf "${row1color}╭───── 🟠 ${row3color}Tool Versions 🟧🧡 ${row1color}───────────────❱\n"
     ;;
   PURPLE)
     # Show the banner - Purple Fade
-    printf "${row1color}╭─────  ${row8color}Tool Versions  ${row1color}───────────────❱\n"
+    printf "${row1color}╭───── 🟣 ${row4color}Tool Versions 🟪💜 ${row1color}───────────────❱\n"
     ;;
   *)
     # If all colors commented out, use Green Fade
-    eprintf "${row1color}╭─────  ${row8color}Tool Versions  ${row1color}───────────────❱\n"
+    printf "${row1color}╭───── 🟢 ${row4color}Tool Versions 🟩💚 ${row1color}───────────────❱\n"
     ;;
 esac
 # Print Output
