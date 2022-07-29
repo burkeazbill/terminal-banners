@@ -1,0 +1,118 @@
+#   Burke Azbill @TechnicalValues github.com/burkeazbill
+#
+# How to install:
+#   1. Copy this file (.banner.apps.rc) to your home directory. Should be $HOME/.banner.apps.rc
+#   2. Uncomment your desired fade color (line 19-23) If none are uncommented, GREEN will be used
+#   3. Adjust the app# lines for your desired title and appropriate method of retrieving version info
+#      This initial version currently does: docker, kubectl, powershell, and powercli
+#   2. Add the following line to the end of your ~/.bashrc and/or ~/.zshrc: 
+#      echo "if [ -f $HOME/.banner.apps.rc ]; then source $HOME/.banner.apps.rc; fi" >> $HOME/.bashrc
+#      echo "if [ -f $HOME/.banner.apps.rc ]; then source $HOME/.banner.apps.rc; fi" >> $HOME/.zshrc
+#    If you ONLY want to display while in an SSH Session:
+#      echo 'if [ -f $HOME/.banner.apps.rc ]; then   if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then source $HOME/.banner.apps.rc; fi; fi' >> $HOME/.bashrc
+#      echo 'if [ -f $HOME/.banner.apps.rc ]; then   if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then source $HOME/.banner.apps.rc; fi; fi' >> $HOME/.zshrc
+#   3. Exit your terminal and re-launch. You should now have the colorized banner prompt show
+#
+###############################################################################################
+# Configure your fade Choice: RED BLUE ORANGE GREEN PURPLE
+# Uncomment only one - if multiple uncommented, only last one is applied:
+# fade_color=RED
+fade_color=BLUE
+# fade_color=ORANGE
+# fade_color=GREEN
+# fade_color=PURPLE
+#### If none of the above are uncommented, then a GREEN border will be used
+
+app1_name="docker"
+app2_name="kubectl"
+app3_name="PowerCLI"
+app4_name="PowerShell"
+app1_version="Not Installed"
+app2_version="Not Installed"
+app3_version="Not Installed"
+app4_version="Not Installed"
+
+# get app version if installed:
+if command -v docker > /dev/null; then
+  app1_version=$(docker version --format '{{json .Client.Version}}');
+fi
+if command -v kubectl > /dev/null; then
+  app2_version=$(kubectl version --client=true -o json | jq .clientVersion.gitVersion)
+fi
+if command -v pwsh > /dev/null; then
+  if [ "$(pwsh -c Get-Module -ListAvailable -Name VMware.Powercli)" ]; then
+    app3_version=\"$(pwsh -c 'Get-Module -ListAvailable VMware.PowerCLI | Select-Object -Property Version | Format-Table -HideTableHeaders' | xargs)\" 
+  fi  
+  app4_version=\"$(pwsh --version | cut -d" " -f2)\" 
+fi
+# Define Normal Reset Color:
+NORMAL=$(tput sgr0)
+
+case "$fade_color" in
+  BLUE)
+    row1color=$(tput setaf 27)
+    row2color=$(tput setaf 33)
+    row3color=$(tput setaf 39)
+    row4color=$(tput setaf 81)
+    row5color=$(tput setaf 45)
+    row6color=$(tput setaf 51)
+    row7color=$(tput setaf 87)
+    row8color=$(tput setaf 159)
+    ;;
+  RED)
+    row1color=$(tput setaf 160)
+    row2color=$(tput setaf 196)
+    row3color=$(tput setaf 197)
+    row4color=$(tput setaf 198)
+    row5color=$(tput setaf 199)
+    row6color=$(tput setaf 200)
+    row7color=$(tput setaf 201)
+    row8color=$(tput setaf 219)
+    ;;
+  *)
+    # Default to GREEN 
+  ;;
+esac
+
+fmt1="${row1color}%-25s${row8color}%-12s\n"
+fmt2="${row2color}%-25s${row8color}%-12s\n"
+fmt3="${row3color}%-25s${row8color}%-12s\n"
+fmt4="${row4color}%-25s${row8color}%-12s\n"
+fmt5="${row5color}%-25s${row8color}%-12s\n"
+fmt6="${row6color}%-25s${row8color}%-12s\n"
+fmt7="${row7color}%-25s${row8color}%-12s\n"
+fmt8="${row8color}%-25s${row8color}%-12s\n"
+
+# Can find Unicode Icons here: 
+# - https://unicode.org/emoji/charts/full-emoji-list.html
+
+case "$fade_color" in
+  BLUE)
+    # Show the banner - Blue Fade
+    printf "${row1color}╭─────  ${row5color}Tool Versions  ${row1color}───────────────❱\n"
+    ;;
+  RED)
+    # Show the banner - Red Fade
+    printf "${row1color}╭─────  ${row7color}Tool Versions  ${row1color}───────────────❱\n"
+    ;;
+  ORANGE)
+    # Show the banner - Orange Fade
+    printf "${row1color}╭─────  ${row8color}Tool Versions 李 ${row1color}───────────────❱\n"
+    ;;
+  PURPLE)
+    # Show the banner - Purple Fade
+    printf "${row1color}╭─────  ${row8color}Tool Versions  ${row1color}───────────────❱\n"
+    ;;
+  *)
+    # If all colors commented out, use Green Fade
+    eprintf "${row1color}╭─────  ${row8color}Tool Versions  ${row1color}───────────────❱\n"
+    ;;
+esac
+# Print Output
+printf $fmt2 "├─❱ $app1_name Version:"  $app1_version
+printf $fmt3 "├─❱ $app2_name Version:"  $app2_version
+printf $fmt4 "├─❱ $app3_name Version:"  $app3_version
+printf $fmt5 "├─❱ $app4_name Version:"  $app4_version
+printf $fmt6 "╰───────────────────────────────────────────❱"
+# Now clear the color code and reset back to normal:
+printf ${NORMAL}
