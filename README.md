@@ -1,3 +1,5 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A5HOQVZ)
+
 # Terminal Banners
 
 The primary terminal banner in this repo ".banner.rc" was inspired by, and initially based on, the excellent work by [Ben Coleman](https://github.com/benc-uk/dotfiles)
